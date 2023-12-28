@@ -211,6 +211,67 @@ if (isset($_POST["enviar4"])) {//permite recepcionar una variable que si exista 
         echo "No existe el archivo copiado <br/>";
     }
 }
+
+if (isset($_POST["enviar5"])) {//permite recepcionar una variable que si exista y que no sea null
+    
+    require_once("conexion.php");
+    require_once("funtions.php");
+
+    //Datos remesas Chile Bolivia
+    $archivoS = $_FILES["archivoS"]["name"];
+    $archivo_copiadoS = $_FILES["archivoS"]["tmp_name"];
+    $archivo_guardadoS = "copia_".$archivoS;
+    
+    //echo $archivo. "esta en la ruta temporal: " .$archivo_copiado;
+
+    if (copy($archivo_copiadoS, $archivo_guardadoS)) {
+        $alert = "Se copio correctamente el archivo temmporal a nuestra carpeta";
+        //echo "Se copio correctamente el archivo temmporal a nuestra carpeta <br/>";
+    }else{
+        echo"Error en el copiado <br/>";
+    }
+
+    if(file_exists($archivo_guardadoS)) {
+        $fp = fopen($archivo_guardadoS,"r");
+        
+        while ($datos = fgetcsv($fp,1000,";")) {
+
+            //$fecha_convertida_0 = ($datos[0] === '-' || empty($datos[0])) ? NULL : DateTime::createFromFormat('d-m-Y H:i:s', $datos[0]);
+            
+            //if ($fecha_convertida_0) {
+              //  $fecha_convertida_0 = $fecha_convertida_0->format('Y-m-d H:i:s');
+            //}
+
+            // Transformar valores decimales (12,3)
+            $decimal_2 = str_replace(".", "", $datos[2]); // Eliminar puntos de los miles
+            $decimal_2 = str_replace(",", ".", $decimal_2); // Reemplazar comas por puntos
+            $decimal_2 = floatval($decimal_2); // Convertir a float
+
+            $decimal_3 = str_replace(".", "", $datos[3]); // Eliminar puntos de los miles
+            $decimal_3 = str_replace(",", ".", $decimal_3); // Reemplazar comas por puntos
+            $decimal_3 = floatval($decimal_3); // Convertir a float
+
+            $decimal_4 = str_replace(".", "", $datos[4]); // Eliminar puntos de los miles
+            $decimal_4 = str_replace(",", ".", $decimal_4); // Reemplazar comas por puntos
+            $decimal_4 = floatval($decimal_4); // Convertir a float
+
+            // Redondear a 3 decimales si es necesario
+            $decimal_2 = number_format($decimal_2, 2, '.', '');
+            $decimal_3 = number_format($decimal_3, 6, '.', '');
+            $decimal_4 = number_format($decimal_4, 2, '.', '');
+            
+            $resultadoB = insertar_datos4($conexion,$datos[0],$datos[1], $decimal_2, $decimal_3, $decimal_4, $datos[5], $datos[6]);
+                //if($resultadoB) {
+                  //echo "Se inserto correctamente la segunda tabla <br/>";
+                //}else{
+                  //  echo "No se inserto la tabla <br/>";
+                //}
+        }
+            
+    }else{
+        echo "No existe el archivo copiado <br/>";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -256,6 +317,12 @@ if (isset($_POST["enviar4"])) {//permite recepcionar una variable que si exista 
         <form action="index.php" class="formulariocompleto" method="post" enctype="multipart/form-data">        
             <input type="file" name="archivoB" class="form"/>
             <input type="submit" value="Subir Archvo Reportes" class="form" name="enviar4">
+        </form>
+        </div>
+        <div>
+        <form action="index.php" class="formulariocompleto" method="post" enctype="multipart/form-data">        
+            <input type="file" name="archivoS" class="form"/>
+            <input type="submit" value="Subir Archvo Reportes" class="form" name="enviar5">
         </form>
         </div>
 </div>

@@ -25,5 +25,14 @@ function insertar_datos3($conexion, $codigo_b, $fecha_b,$correlativo_b,$document
    return $ejecutar;
 }
 
+function insertar_datos4($conexion, $fecha, $moneda_s, $resultado_s ,$tc_of, $saldo_bob, $cod_ag, $agencia_a) {
+  
+   global $conexion;
+   $sentencia = "INSERT INTO saldo_cajas (FECHA ,MONEDA_S ,SALDO_S ,TC_OF ,SALDO_BOB ,COD_AG ,AGENCIA_A ) VALUES ('$fecha', '$moneda_s', '$resultado_s' ,'$tc_of', '$saldo_bob', '$cod_ag', '$agencia_a')";
+   $ejecutar = mysqli_query($conexion, $sentencia);
+   //var_dump($sentencia);
+   return $ejecutar;
+   
+}
 ?>
 
