@@ -18,10 +18,7 @@
     <!--  Datatables Responsive  -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css">
     <style>
-        thead{
-            background-color: #F38E2E;
-            color: #FFF;
-        }
+        
     </style>
 </head>
 <body>
