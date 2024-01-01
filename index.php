@@ -218,10 +218,27 @@ if (isset($_POST["enviar5"])) {//permite recepcionar una variable que si exista 
     require_once("funtions.php");
 
     //Datos remesas Chile Bolivia
-    $archivoS = $_FILES["archivoS"]["name"];
-    $archivo_copiadoS = $_FILES["archivoS"]["tmp_name"];
-    $archivo_guardadoS = "copia_".$archivoS;
+    //$archivoS = $_FILES["archivoS"]["name"];
+    //$archivo_copiadoS = $_FILES["archivoS"]["tmp_name"];
+    //$archivo_guardadoS = "copia_".$archivoS;
     
+
+    $directorio_destino = 'C:/xampp/htdocs/cvs/RemesasExel/';
+    $archivoS = $_FILES["archivoS"]["name"];
+    $archivo_guardadoS = $directorio_destino . "copia_" . $archivoS;
+    
+    // Verificar si el archivo ya existe en el directorio
+    if (file_exists($archivo_guardadoS)) {
+        echo "El archivo ya existe. No se puede subir el mismo archivo nuevamente.";
+    } else {
+        $archivo_copiadoS = $_FILES["archivoS"]["tmp_name"];
+    
+        if (copy($archivo_copiadoS, $archivo_guardadoS)) {
+            $alert = "Se copió correctamente el archivo temporal a nuestra carpeta";
+        } else {
+            echo "Error en el copiado <br/>";
+        }
+
     //echo $archivo. "esta en la ruta temporal: " .$archivo_copiado;
 
     if (copy($archivo_copiadoS, $archivo_guardadoS)) {
@@ -233,6 +250,8 @@ if (isset($_POST["enviar5"])) {//permite recepcionar una variable que si exista 
 
     if(file_exists($archivo_guardadoS)) {
         $fp = fopen($archivo_guardadoS,"r");
+
+        fgetcsv($fp, 1000, ";");
         
         while ($datos = fgetcsv($fp,1000,";")) {
 
@@ -271,6 +290,7 @@ if (isset($_POST["enviar5"])) {//permite recepcionar una variable que si exista 
     }else{
         echo "No existe el archivo copiado <br/>";
     }
+}
 }
 ?>
 <!DOCTYPE html>
@@ -325,8 +345,8 @@ if (isset($_POST["enviar5"])) {//permite recepcionar una variable que si exista 
             <input type="submit" value="Subir Archvo Reportes" class="form" name="enviar5">
         </form>
         </div>
-</div>
-        
-    
+</div>  
+
+
 </body>
 </html>

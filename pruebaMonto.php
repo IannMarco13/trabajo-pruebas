@@ -1,11 +1,72 @@
 <?php
 require('ReportePDF/fpdf.php');
+use Carbon\Carbon;
+require __DIR__ . '/vendor/autoload.php';
+require_once 'conexion.php';
+class PDF extends FPDF {
+  // Cabecera de página
+   function Header()
+   {
+      $this->Image('ReportePDF/img/logo.png', 15, 5, 20); //logo de la empresa,moverDerecha,moverAbajo,tamañoIMG
+      $this->SetFont('Arial', 'B', 19); //tipo fuente, negrita(B-I-U-BIU), tamañoTexto
+      $this->Cell(95); // Movernos a la derecha
+      $this->SetTextColor(0, 0, 0); //color
+      //creamos una celda o fila
+      //CENTREAMOS EL TITULO EN EL MEDIO DE LA HOJA
+      $pageWidth = $this->GetPageWidth();
+      $xPosition = ($pageWidth - 25) / 2; // Calcula la posición X para centrar
+      $this->SetXY($xPosition, 15); // Establece la posición X y Y para centrar
+      $this->Cell(25, 25, utf8_decode('GAMBARTE'), 0, 1, 'C', 0);// AnchoCelda,AltoCelda,titulo,borde(1-0),saltoLinea(1-0),posicion(L-C-R),ColorFondo(1-0)
+      $this->Ln(1); // Salto de línea
+      /* letras pequenas */ 
+      $this->SetTextColor(103); //PARA PODER CAMBIAR EL COLOR DE LA LETRA TIENE QUE ESTAR ENSIMA DE TODO
+      $this->Cell(100); // mover a la derecha
+      $this->SetFont('Arial', 'I', 8);
+      $pageWidth = $this->GetPageWidth();
+      $xPosition = ($pageWidth - 25) / 2; // Calcula la posición X para centrar
+      $this->SetXY($xPosition, 20); // Establece la posición X y Y para centrar
+      $this->Cell(25, 25, utf8_decode('Giros-Remesas de Dienro'), 0, 1, 'C', 0);
+    
+      $this->Ln(5);
+
+      $this->SetTextColor(228, 100, 0);//color
+      $this->Cell(100); // mover a la derecha
+      $this->SetFont('Arial', 'B', 15);
+      $pageWidth = $this->GetPageWidth();
+      $xPosition = ($pageWidth - 25) / 2; // Calcula la posición X para centrar
+      $this->SetXY($xPosition, 30); // Establece la posición X y Y para centrar
+      $this->Cell(25, 25, utf8_decode("REPORTE DE REMESAS"), 0, 1, 'C', 0);
+      $this->Ln(7);
+
+   }
+   // Pie de página
+   function Footer()
+   {
+      $this->SetY(-15); // Posición: a 1,5 cm del final
+      $this->SetFont('Arial', 'I', 8); //tipo fuente, negrita(B-I-U-BIU), tamañoTexto
+      $pageWidth = $this->GetPageWidth();
+      $xPosition = ($pageWidth - 25) / 2; // Calcula la posición X para centrar
+      $this->SetXY($xPosition, -25); 
+      //$this->Cell(25, 25, utf8_decode('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'C'); //pie de pagina(numero de pagina)
+
+     //FECHA FORMATO 
+     $this->SetY(-15); // Posición: a 1,5 cm del final
+     $this->SetFont('Arial', 'I', 8); // Tipo de fuente: Arial, itálica, tamaño 8
+     // Obtener la fecha actual con Carbon y formatearla
+     $hoy = Carbon::now()->locale('es_ES')->isoFormat('D [de] MMMM [de] YYYY');
+     $pageWidth = $this->GetPageWidth();
+     $xPosition = ($pageWidth - 25) / 2; // Calcula la posición X para centrar
+     $this->SetXY($xPosition, -30); 
+     $this->Cell(25, 25, utf8_decode('La Paz, '.$hoy), 0, 0, 'C'); // Pie de página (fecha de página)
+   }
+}
+
 // Obtener las fechas
 $from_date = $_GET['from_date'] ?? null;
 //var_dump($from_date);
 $to_date = $_GET['to_date'] ?? null;
 //var_dump($to_date);
-require_once 'conexion.php';
+
 $queryBob = "SELECT SUM(MONTO_BOB) AS total_monto_bob FROM report_chile_bolivia WHERE DATE(FECHA_ORI) BETWEEN '$from_date' AND '$to_date'";
 
 $resultBob = $conexion->query($queryBob);
@@ -20,7 +81,7 @@ $rowUsd = $resultUsd->fetch_assoc();
 $totalMontoUsd = $rowUsd['total_monto_usd'];
 
 // Consulta para obtener el total de MONTO_ENV entre las fechas
-$queryMontoEnviado = "SELECT SUM(MONTO_ENV) AS total_monto_enviado FROM remesas_bolivia_chile WHERE DATE(FECHA_B) BETWEEN '$from_date' AND CURDATE()";
+$queryMontoEnviado = "SELECT SUM(MONTO_ENV) AS total_monto_enviado FROM remesas_bolivia_chile WHERE DATE(FECHA_B) BETWEEN '$from_date' AND '$to_date'";
 
 $resultMontoEnviado = $conexion->query($queryMontoEnviado);
 $rowMontoEnviado = $resultMontoEnviado->fetch_assoc();
@@ -28,9 +89,9 @@ $totalMontoEnviado = $rowMontoEnviado['total_monto_enviado'];
 
 // Realizar cálculos
 
-$totalMontoFinal = round($totalMontoBob / 6.86,2) + $totalMontoUsd ;
+$totalMontoFinal = round($totalMontoBob / 6.86 , 2) + $totalMontoUsd ;
 
-$diferencia = abs($totalMontoFinal -$totalMontoEnviado);
+
 // Mostrar resultados
 //echo "<br>Total Monto BOB enviado por Chile: " . $totalMontoBob . "<br>";
 //echo "Total Monto USD enviado por Chile: " . $totalMontoUsd . "<br>";
@@ -38,30 +99,63 @@ $diferencia = abs($totalMontoFinal -$totalMontoEnviado);
 
 //echo "Total Monto Enviado por Bolivia: " . $totalMontoEnviado . "<br>";
 
-if ($totalMontoFinal > $totalMontoEnviado){
-
-    $diferencia = abs($totalMontoFinal -$totalMontoEnviado);
-  //  echo "La diferencia de envio entre Chile - Bolivia es: ".$diferencia."<br>";
-}else {
-    $diferencia = abs($totalMontoFinal - $totalMontoEnviado);
-    //echo "La diferencia de envio entre Bolivia - Chile es de: ".$diferencia."<br>";
-}
-
 // Crear un nuevo objeto FPDF
-$pdf = new FPDF();
-$pdf->AddPage();
-
+$pdf = new PDF();
+$pdf->AddPage("portrait");
+$pdf->AliasNbPages(); //muestra la pagina / y total de paginas
+$i = 0;
+$pdf->SetFont('Arial', 'B', 12);
+$pdf->Cell(0, 10, utf8_decode('Gambarte Chile SpA :'), 0, 1);
+$pdf->SetFont('Arial', '', 12);
+$pdf->SetDrawColor(163, 163, 163);
 // Establecer la fuente y el tamaño del texto
 $pdf->SetFont('Arial', '', 12);
-
 // Contenido del PDF
-$pdf->Cell(0, 10, utf8_decode('Reporte de Envíos'), 0, 1);
-$pdf->Cell(0, 10, utf8_decode('Total Monto BOB enviado por Chile: ') . $totalMontoBob, 0, 1);
-$pdf->Cell(0, 10, utf8_decode('Total Monto USD enviado por Chile: ') . $totalMontoUsd, 0, 1);
-$pdf->Cell(0, 10, utf8_decode('Total Final Enviado por Chile: '). $totalMontoFinal, 0, 1);
-$pdf->Cell(0, 10, utf8_decode('Total Monto Enviado por Bolivia: ') . $totalMontoEnviado, 0, 1);
+$pdf->Cell(0, 10, utf8_decode('Monto Total Enviado en Bolivianos: '), 0, 0);
+$pdf->Cell(0, 10, $totalMontoBob, 0, 1, 'R');
 
-$pdf->Cell(0, 10, utf8_decode('Total Monto Enviado por Bolivia: ') . $diferencia, 0, 1);
+$pdf->Cell(0, 10, utf8_decode('Monto Total Enviado en Dolar Estado Unidence: ') , 0, 0);
+$pdf->Cell(0,10, $totalMontoUsd ,0,1,'R');
+
+$pdf->Cell(0, 10, utf8_decode('Monto Total Enviado por Gambarte SpA en Dolar Estado Unidence:'), 0, 0);
+$pdf->Cell(0,10, $totalMontoFinal,0,1,'R') ;
+$pdf->Ln(5);
+$pdf->SetFont('Arial', 'B', 12);
+$pdf->Cell(0,10, utf8_decode('Gambarte Bolivia S.R.L:') ,0,1);
+$pdf->SetFont('Arial', '', 12);
+$pdf->Cell(0, 10, utf8_decode('Monto Total Enviado en Dolar Estado Unidence: ') , 0, 0);
+$pdf->Cell(0,10,$totalMontoEnviado,0,1,'R');
+$pdf->Ln(5);
+$pdf->SetFont('Arial', 'B', 12);
+$pdf->Cell(0,10, utf8_decode('Diferencia:') ,0,1);
+$pdf->SetFont('Arial', '', 12);
+$pdf->Cell(0,10, utf8_decode('Total Diferencia en Dolar Estado Unidence:') ,0, 0);
+
+if ($totalMontoFinal > $totalMontoEnviado){
+  $diferencia = abs($totalMontoFinal -$totalMontoEnviado);
+  $pdf->Cell(0, 10, $diferencia, 0, 1,'R');
+  $pdf->Cell(0, 10, utf8_decode('En fecha ').$from_date.utf8_decode('a fecha ').$to_date , 0, 1);
+  $pdf->Cell(0, 10, utf8_decode('En fecha ').date("d-m-Y",strtotime($from_date)).utf8_decode(' a fecha ').date("d-m-Y",strtotime($to_date)) .utf8_decode(' Gambarte S.R.L. envio '). $totalMontoEnviado.(' Dolar Estado Unidence a Gambarte SpA con una diferencia de '). $diferencia, 0, 1);
+
+//  echo "La diferencia de envio entre Chile - Bolivia es: ".$diferencia."<br>";
+}else {
+  $diferencia = abs($totalMontoFinal - $totalMontoEnviado);
+  $pdf->Cell(0, 10, $diferencia, 0, 1, 'R');
+
+  // Texto largo
+//$textoLargo = utf8_decode('En fecha ') . date("d-m-Y", strtotime($from_date)) . utf8_decode(' a fecha ') . date("d-m-Y", strtotime($to_date)) . utf8_decode(' Gambarte S.R.L. envió ') . $totalMontoEnviado . (' Dólar Estadounidense a Gambarte SpA con una diferencia de ') . $diferencia;
+//// Ancho de la celda
+//$anchoCelda = 180;
+//// Altura de la celda
+//$alturaCelda = 10;
+//// Borde de la celda
+//$borde = 0;
+//// Alineación del texto (L: izquierda, C: centro, R: derecha)
+//$alineacion = 'J'; // Justificar
+//$pdf->MultiCell($anchoCelda, $alturaCelda, $textoLargo, $borde, $alineacion);
+  $pdf->Ln(25);
+  $pdf->MultiCell(180, 10,utf8_decode('En fecha ') . date("d-m-Y", strtotime($from_date)) . utf8_decode(' a fecha ') . date("d-m-Y", strtotime($to_date)) . utf8_decode(' Gambarte S.R.L. envió ') . $totalMontoEnviado . utf8_decode(' Dólar Estadounidense a Gambarte SpA con una diferencia de ') . $diferencia, 0, 'J');
+}
 
 // Nombre del archivo PDF
 $fileName = 'reporte_envios.pdf';

@@ -1,14 +1,8 @@
 <?php
     require_once("menu.php");
     include("conexion.php");
+    $cantidad = 0;
     use Carbon\Carbon;
-    //$cantidad = 0;
-    //$sql = "SELECT * FROM remesas_env_chile_bolivia";
-    //$resultadoMCB=mysqli_query($conexion,$sql);
-    //$registros = $conexion->query($query);
-    //$registros = $registros->fetch_assoc();
-    //var_dump("",$registros); este comando ayuda a saber que llega en esa variable
-    // exit();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -94,7 +88,6 @@
                         <th>TOTAL_CLP</th>
                         <th>REMITENTE</th>
                         <th>DESTINATARIO</th>
-
                     </tr>
                 </thead>
                 <tbody>
@@ -107,9 +100,11 @@
                     WHERE DATE(FECHA) BETWEEN '$from_date' AND '$to_date';";
                     $query_run = mysqli_query($conexion, $query);
                     if(mysqli_num_rows($query_run) > 0){
-                        foreach($query_run as $fila){ ?>
+                        foreach($query_run as $fila){ 
+                            $cantidad ++;?>
+                        
                         <tr>
-                            <td> <?php echo $fila['ID'] ?> </td>
+                            <td><?php echo $cantidad; ?></td>
                             <td> <?php echo $fila['CODIGO'] ?> </td>
                             
                             <td> <?php echo date("d-m-Y h:i", strtotime($fila['FECHA'])) ?> </td>
