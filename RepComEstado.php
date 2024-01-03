@@ -4,7 +4,8 @@ $cantidad = 0;
 include("conexion.php");
 use Carbon\Carbon;
 require_once __DIR__ . '/vendor/autoload.php';
-
+$from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
+$to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -66,18 +67,19 @@ require_once __DIR__ . '/vendor/autoload.php';
                         <button type="submit" class="btn btn-secondary">Buscar</button>
                         <div class="text-right">
                             <!--hacemos que los datos de los canlendarios se guaden y puedan ser re usados-->
-                            <a href="ReportePDF/PDFconsulta1.php?from_date=<?php echo $_GET['from_date']; ?>&to_date=<?php echo $_GET['to_date']; ?>" target="_blank" class ="btn btn-success">
-                            <i name="Generar_reporte" class="far fa-file-pdf"></i> Generar Reporte</a>
+                            <a href="ReportePDF/PDFconsulta1.php?from_date=<?php echo $from_date; ?>&to_date=<?php echo $to_date; ?>" target="_blank" class="btn btn-success">
+                            <i name="Generar_reporte" class="far fa-file-pdf"></i> Generar Reporte
+                            </a>
 
-                            <a href="pruebaMonto.php?from_date=<?php echo $_GET['from_date']; ?>&to_date=<?php echo $_GET['to_date']; ?>" target="_blank" class ="btn btn-success">
-                            <i name="Generar_reporte" class="far fa-file-pdf"></i> Generar Consulta</a>
+                            <a href="pruebaMonto.php?from_date=<?php echo $from_date; ?>&to_date=<?php echo $to_date; ?>" target="_blank" class="btn btn-success">
+                            <i name="Generar_reporte" class="far fa-file-pdf"></i> Generar Consulta
+                            </a>
                         </div>
                     </div>
                 </div>
                 </div>
                 <br>
             </form>
-
 
         <div class="row">
             <div class="col-lg-12">
